@@ -1,11 +1,15 @@
 <resources>
-    <string name="app_name">EnvioPosicionFlotas</string>
+    <string name="app_name">ArcoTrack</string>
     <string name="latitud">Latitud:</string>
     <string name="longitud">Longitud:</string>
     <string name="altitud">Altitud:</string>
     <string name="velocidad">Velocidad:</string>
     <string name="curso">Curso:</string>
     <string name="hora">Hora:</string>
-    <string name="comenzar">Comenzar localización</string>
+    <string name="imei">Código Aplicación:</string>
+    <string name="user">Usuario:</string>
+    <string name="pass">Contraseña:</string>
+    <string name="entrar">Entrar</string>
+
 
 </resources>
