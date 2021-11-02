@@ -1,4 +1,4 @@
-package com.example.aroctrack;
+package com.arcoelectronica.aroctrack;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +24,7 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.arcotrack.R;
+import com.arcoelectronica.arcotrack.R;
 
 import java.io.IOException;
 import java.io.PrintWriter;

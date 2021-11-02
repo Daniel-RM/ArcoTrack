@@ -1,6 +1,6 @@
-package com.example.aroctrack;
+package com.arcoelectronica.aroctrack;
 
-import com.example.arcotrack.R;
+import com.arcoelectronica.arcotrack.R;
 
 import androidx.appcompat.app.AppCompatActivity;
 
