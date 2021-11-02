@@ -45,10 +45,11 @@ public class LoginActivity extends AppCompatActivity {
 
         //Compruebo si la aplicación ya tiene un código único asignado. Si no es así, lo creo y se lo asigno
         SharedPreferences preferences = getSharedPreferences("codigoInicial", Context.MODE_PRIVATE);
-        if (preferences == null){
+        code = preferences.getString("codigo","");
+
+        if(code.equals("")){
             creaCodigo();
         }else{
-            code = preferences.getString("codigo","");
             code = code.replace("-","");
             code = code.substring(0,1) + code.substring(4,5) + code.substring(9,10) + code.substring(14,15) + code.substring(19,20);
             code = code.toUpperCase();
@@ -98,6 +99,13 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("codigo", UUID.randomUUID().toString());
         editor.commit();
+
+        SharedPreferences preferences2 = getSharedPreferences("codigoInicial", Context.MODE_PRIVATE);
+        code = preferences2.getString("codigo","");
+        code = code.replace("-","");
+        code = code.substring(0,1) + code.substring(4,5) + code.substring(9,10) + code.substring(14,15) + code.substring(19,20);
+        code = code.toUpperCase();
+        tvCodigo.setText(code);
     }
 
     public void comprobarCodigo(String usuario, String codigo, String imei){
