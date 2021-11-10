@@ -43,6 +43,21 @@ public class LoginActivity extends AppCompatActivity {
 
         informa();
 
+        //Para las tablet de la feria
+//        code = "81F75";
+//        tvCodigo.setText(code);
+//        user = "COMARCO888";
+//        pass = "35813";
+//        edtUser.setText(user);
+//        edtPass.setText(pass);
+
+        code = "161FA";
+        tvCodigo.setText(code);
+        user = "COMARCO012";
+        pass = "24B4B";
+        edtUser.setText(user);
+        edtPass.setText(pass);
+
         //Compruebo si la aplicación ya tiene un código único asignado. Si no es así, lo creo y se lo asigno
         SharedPreferences preferences = getSharedPreferences("codigoInicial", Context.MODE_PRIVATE);
         code = preferences.getString("codigo","");
@@ -62,6 +77,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 user = edtUser.getText().toString().toUpperCase();
                 pass = edtPass.getText().toString().toUpperCase();
+
+
 
                 if(user.equals("") || pass.equals("")){
                     Toast.makeText(getApplicationContext(), "Por favor introduzca el usuario y la contraseña", Toast.LENGTH_SHORT).show();

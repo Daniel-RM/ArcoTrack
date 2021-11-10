@@ -1,11 +1,15 @@
 package com.arcoelectronica.aroctrack;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -15,6 +19,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -52,9 +57,6 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
     long tiempos;
     float precision;
 
-    //String identificador = "COMARCO012";
-    //String identificador = "PRUEBAD999";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,13 +83,13 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
 //        getWindow().setAttributes(params);
 
         Bundle extras = getIntent().getExtras();
-        if(extras != null){
+        if (extras != null) {
             user = extras.getString("user");
             imei = extras.getString("imei");
             identificador = user;
             tvUser.setText(user);
             tvImei.setText(imei);
-        }else{
+        } else {
             Toast.makeText(getApplicationContext(), "Ha habido algún problema. por favor, vuelva a introducir sus datos", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
@@ -101,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
         }
 
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, 1000);
             return;
         } else {
@@ -110,13 +113,14 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
     }
 
 
-
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1000) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationStart();
-                return;
+            if (grantResults.length > 0) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationStart();
+                    return;
+                }
             }
         }
     }
@@ -130,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
         Localizacion Local = new Localizacion();
         Local.setMainActivity(this);
         final boolean gpsEnabled = mlocManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
         if (!gpsEnabled) {
             Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivity(settingsIntent);
@@ -139,9 +144,20 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION,}, 1000);
             return;
         }
+//        else{
+//
+////            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS); //.ACTION_APPLICATION_DETAILS_SETTINGS
+////            Uri uri =Uri.fromParts("package", getPackageName(), null);
+////            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////            intent.setData(uri);
+////            startActivity(intent);
+//
+//
+//        }
 
-            mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - internet
-            mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - GPS
+
+        mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - internet
+        mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - GPS
 
 
             status = mlocManager.getGpsStatus(null);
@@ -157,7 +173,6 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void enviaTrama(Location location) {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -169,6 +184,12 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
         lon = location.getLongitude();
         lat = location.getLatitude();
         altitud = String.valueOf((int)location.getAltitude());
+
+
+        df.setTimeZone(TimeZone.getTimeZone("Europe/Madrid"));
+        String tiempoMadrid = df.format(location.getTime());
+        tiempoMadrid = tiempoMadrid.substring(11,19);
+        tvHora.setText(tiempoMadrid);
 
 
         if(estado == null){
@@ -190,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
         tvLatitud.setText(String.valueOf(lat));
         tvLongitud.setText(String.valueOf(lon));
         tvAltitud.setText(altitud);
-        tvHora.setText(horas);
+        //tvHora.setText(horas);
 
 
         cadena = identificador + ",0,0,0,0,0,0,0," + fecha + "," + horas + "," + Math.abs(lon) + "," + Math.abs(lat) + "," + latNS + "," + lonES + "," + altitud + "," + velocidad + "," + estado + "," + satelites + "," + curso + "," + 1 + "," + 0 + "," + "VM_0";
@@ -260,7 +281,6 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
             this.mainActivity = mainActivity;
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void onLocationChanged(Location loc) {
 
@@ -284,6 +304,7 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
 
             Log.d("Trama recibida: ",loc.getLatitude() + ", " + loc.getLongitude());
             enviaTrama(loc);
+
         }
 
         @Override
