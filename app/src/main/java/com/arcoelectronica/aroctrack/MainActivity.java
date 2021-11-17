@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.Service;
@@ -76,11 +77,6 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
         //Mantengo la pantalla en vertical siempre
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-//        //Mantengo la pantalla encendida, ya que no se manda la ubicación en segundo plano
-//        WindowManager.LayoutParams params = getWindow().getAttributes();
-//        params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-//        params.screenBrightness = 1;
-//        getWindow().setAttributes(params);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -95,6 +91,13 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
             startActivity(intent);
         }
 
+        Intent intent = new Intent(this, MyService.class);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        }else{
+            startService(intent);
+        }
 
         admin_wifi = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
@@ -144,21 +147,11 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION,}, 1000);
             return;
         }
-//        else{
-//
-////            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS); //.ACTION_APPLICATION_DETAILS_SETTINGS
-////            Uri uri =Uri.fromParts("package", getPackageName(), null);
-////            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-////            intent.setData(uri);
-////            startActivity(intent);
-//
-//
-//        }
 
+        loadPermissionPage(this);
 
-        mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - internet
-        mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - GPS
-
+        //mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 500, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - internet
+        mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 500, (LocationListener) Local);//Compruebo coordenadas cuando cambian y cada 60 segundos; Proveedor - GPS
 
             status = mlocManager.getGpsStatus(null);
             satellites = status.getSatellites();
@@ -170,6 +163,14 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
 
             tvInfo.setText("Localización agregada");
 
+    }
+
+    private void loadPermissionPage(Activity activity){
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+        intent.setData(uri);
+        activity.startActivityForResult(intent, 0);
     }
 
 
@@ -213,8 +214,15 @@ public class MainActivity extends AppCompatActivity implements GpsStatus.Listene
         tvAltitud.setText(altitud);
         //tvHora.setText(horas);
 
+        String proveedor = location.getProvider();
+//        if(proveedor.equals("network")){
+//            // el proveedor es la red
+//            cadena = identificador + ",20,20,20,20,20,20,20," + fecha + "," + horas + "," + Math.abs(lon) + "," + Math.abs(lat) + "," + latNS + "," + lonES + "," + altitud + "," + velocidad + "," + estado + "," + satelites + "," + curso + "," + 1 + "," + 0 + "," + "VM_0";
+//        }else{
+            // el proveedor es el GPS
+            cadena = identificador + ",0,0,0,0,0,0,0," + fecha + "," + horas + "," + Math.abs(lon) + "," + Math.abs(lat) + "," + latNS + "," + lonES + "," + altitud + "," + velocidad + "," + estado + "," + satelites + "," + curso + "," + 1 + "," + 0 + "," + "VM_0";
+       // }
 
-        cadena = identificador + ",0,0,0,0,0,0,0," + fecha + "," + horas + "," + Math.abs(lon) + "," + Math.abs(lat) + "," + latNS + "," + lonES + "," + altitud + "," + velocidad + "," + estado + "," + satelites + "," + curso + "," + 1 + "," + 0 + "," + "VM_0";
         Log.d("Cadena", cadena);
 
         AsyncTask.execute(new Runnable() {
